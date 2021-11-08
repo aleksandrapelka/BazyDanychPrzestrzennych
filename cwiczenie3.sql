@@ -28,25 +28,19 @@ SELECT railroads.geom FROM railroads, regions WHERE ST_Contains(regions.geom, ra
 UNION
 SELECT geom FROM regions WHERE name_2 = 'Matanuska-Susitna';
 
---INTERSECTION
-SELECT ST_Intersection(railroads.geom, regions.geom) FROM railroads, regions
-UNION
-SELECT geom FROM regions WHERE name_2 = 'Matanuska-Susitna';
-
 --INTERSECTS
 SELECT railroads.geom FROM railroads, regions WHERE ST_Intersects(regions.geom, railroads.geom) AND regions.name_2 = 'Matanuska-Susitna'
 UNION
 SELECT geom FROM regions WHERE name_2 = 'Matanuska-Susitna';
 
-
------------------
-SELECT ST_Intersection(regions.geom, railroads.geom) FROM railroads, regions WHERE ST_Intersects(regions.geom, railroads.geom) AND regions.name_2 = 'Matanuska-Susitna'
+--INTERSECTION
+SELECT ST_Intersection(railroads.geom, regions.geom) FROM railroads, regions WHERE regions.name_2 = 'Matanuska-Susitna'
 UNION
 SELECT geom FROM regions WHERE name_2 = 'Matanuska-Susitna';
 
 --długość linii kolejowych----
 SELECT SUM(ST_Length(ST_Intersection(regions.geom, railroads.geom))) AS dlugoscLiniiKolejowych FROM railroads, regions 
-WHERE ST_Intersects(regions.geom, railroads.geom) AND regions.name_2 = 'Matanuska-Susitna'
+WHERE regions.name_2 = 'Matanuska-Susitna';
 
 
 --4. Oblicz, na jakiej średniej wysokości nad poziomem morza położone są lotniska 
@@ -101,7 +95,7 @@ SELECT geom FROM regions WHERE regions.name_2 = 'Bristol Bay';
 
 
 -- 6. Sprawdź w ilu miejscach przecinają się rzeki (majrivers) z liniami kolejowymi (railroads).
-SELECT DISTINCT ST_Intersection(majrivers.geom, railroads.geom) FROM majrivers, railroads WHERE ST_Intersects(railroads.geom, majrivers.geom)
+SELECT DISTINCT ST_Intersection(majrivers.geom, railroads.geom) FROM majrivers, railroads
 UNION
 SELECT DISTINCT railroads.geom FROM majrivers INNER JOIN railroads ON ST_Intersects(majrivers.geom, railroads.geom)
 UNION
@@ -134,12 +128,11 @@ UNION
 SELECT ST_UNION(ST_Buffer(railroads.geom, 164042)) FROM railroads
 
 
-
-SELECT ST_Intersection(lotniska.geom, ST_Buffer(trails.geom, 3280)) as geom INTO hotels2 FROM 
+SELECT ST_Intersection(lotniska.geom, ST_Buffer(trails.geom, 3280)) FROM
 (
-select st_buffer(airports.geom, 328083) as geom from airports 
-where (st_distance(st_buffer(airports.geom, 328083), (select st_union(railroads.geom) from railroads)) > 164042)
+SELECT ST_Difference(ST_UNION(ST_Buffer(airports.geom, 328083)), ST_UNION(ST_Buffer(railroads.geom, 164042))) AS geom
+FROM airports, railroads	
 ) AS lotniska, trails
-WHERE ST_Intersects(lotniska.geom, ST_Buffer(trails.geom, 3280))
+UNION
+SELECT ST_UNION(ST_Buffer(railroads.geom, 164042)) FROM railroads;
 
-select * from hotels2
