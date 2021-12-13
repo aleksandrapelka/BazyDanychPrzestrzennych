@@ -1,0 +1,9 @@
+SELECT first_name, last_name, 
+		ST_DistanceSpheroid( 
+			CAST(ST_SetSRID( ST_Point(lat, long), 4326) AS geometry), CAST(ST_SetSRID( ST_Point(41.39988501005976, -75.67329768604034), 4326) AS geometry),
+			'SPHEROID["WGS 84",6378137,298.257223563]')/1000 AS odleglosc INTO BEST_CUSTOMERS_404407
+FROM customers_404407
+WHERE
+	ST_DistanceSpheroid( 
+			CAST(ST_SetSRID( ST_Point(lat, long), 4326) AS geometry), CAST(ST_SetSRID( ST_Point(41.39988501005976, -75.67329768604034), 4326) AS geometry),
+			'SPHEROID["WGS 84",6378137,298.257223563]')/1000 < 50
